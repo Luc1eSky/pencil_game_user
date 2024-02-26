@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../constants.dart';
 import '../features/game/presentation/game_screen.dart';
-import '../features/user_login/presentation/login_gate.dart';
+import '../features/user/presentation/login_gate.dart';
 
 enum AppRoute {
   login,

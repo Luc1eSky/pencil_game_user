@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../constants.dart';
 import '../../../firestore/firestore_instance_provider.dart';
+import '../../schedule/domain/schedule.dart';
 import '../domain/app_user.dart';
 
 class FirestoreUserRepository {
@@ -58,6 +59,7 @@ class FirestoreUserRepository {
     required String uuid,
   }) async {
     debugPrint('Creating user doc from code $shareCode and uuid $uuid.');
+
     try {
       // check if user share code doc exists
       final querySnap = await _getUserShareCodeDoc(shareCode);
@@ -80,32 +82,49 @@ class FirestoreUserRepository {
       // delete user share code doc
       await querySnap.docs.first.reference.delete();
 
-      // add new user doc to users sub-collection under experiment
+      // add new (basic) user doc to users top level collection with reference to experiment
       await _firestore.collection(userCollectionName).doc(uuid).set({
         'experimentDocId': appUser.experimentDocId,
+        'createdOn': Timestamp.now(),
       });
+
+      // add new (detailed) user doc to users sub-collection under experiment
       await experimentRef.collection(userCollectionName).doc(uuid).set(appUser.toFirestore());
 
-      // start transaction to keep track of user count in experiment
+      // TODO: MOVE TO SCHEDULE REPOSITORY
+      // TODO: CREATE SERVICE THAT COMBINES REPOSITORIES
+      // start transaction to keep track of user count in schedule
+      final scheduleRef = experimentRef.collection('schedule').doc('schedule');
       _firestore.runTransaction((transaction) async {
         // get experiment document
-        final experimentDoc = await transaction.get(experimentRef);
+        final scheduleDoc = await transaction.get(scheduleRef);
 
         // exit if it does not exist
-        if (!experimentDoc.exists) {
-          throw Exception('Document $experimentDocId not exist.');
+        if (!scheduleDoc.exists) {
+          throw Exception('Schedule document for experiment $experimentDocId does not exist.');
+        }
+        // exit if there is no data
+        if (scheduleDoc.data() == null) {
+          throw Exception('Schedule document for experiment $experimentDocId has no data.');
         }
 
-        // calculate new user count
-        final int newUserCount = (experimentDoc.data()?['userCount'] ?? -1) + 1;
+        // get current schedule
+        final currentSchedule = Schedule.fromJson(scheduleDoc.data()!);
 
-        // update experiment doc field with new user count
-        transaction.update(experimentRef, {'userCount': newUserCount});
+        // get current color code list and update it
+        final colorCodeList = [...currentSchedule.playerColorCodes];
+        colorCodeList.add(appUser.colorCode);
+
+        // create updated schedule
+        final updatedSchedule = currentSchedule.copyWith(playerColorCodes: colorCodeList);
+
+        // update schedule doc with new user count and color color code list
+        transaction.update(scheduleRef, updatedSchedule.toJson());
       });
 
       return true;
     } catch (error) {
-      debugPrint('Error: $error');
+      debugPrint('$error');
       return false;
     }
   }

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../authorize/data/firestore_auth_instance_provider.dart';
-import '../../user_login/data/firestore_user_repository.dart';
-import '../../user_login/domain/app_user.dart';
+import '../../user/data/firestore_user_repository.dart';
+import '../../user/domain/app_user.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({
