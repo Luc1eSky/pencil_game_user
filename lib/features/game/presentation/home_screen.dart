@@ -16,7 +16,9 @@ class HomeScreen extends ConsumerWidget {
     final userUid = ref.watch(firebaseAuthInstanceProvider).currentUser!.uid;
     return Center(
       child: StreamBuilder(
-          stream: ref.read(firestoreUserRepositoryProvider).getUserDocStream(userUid),
+          stream: ref
+              .read(firestoreUserRepositoryProvider)
+              .getUserDocStream(userUid),
           builder: (context, snapshot) {
             if (snapshot.hasError || !snapshot.hasData) {
               return Container();
@@ -55,20 +57,29 @@ class HomeScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          if (appUser.currentTableNumber != null)
-                            appUser.currentTableNumber == 0
-                                ? const Text(
-                                    'YOU ARE PAUSING THIS ROUND.',
-                                    style: TextStyle(fontSize: 30),
-                                  )
-                                : Text(
-                                    'GO TO TABLE: ${appUser.currentTableNumber}',
-                                    style: const TextStyle(fontSize: 40),
+                          appUser.currentTableNumber == null
+                              ? const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'PLEASE WAIT YOUR SEAT IS BEING ASSIGNED.',
+                                    style: TextStyle(fontSize: 20),
                                   ),
+                                )
+                              : appUser.currentTableNumber == 0
+                                  ? const Text(
+                                      'YOU ARE PAUSING THIS ROUND.',
+                                      style: TextStyle(fontSize: 30),
+                                    )
+                                  : Text(
+                                      'GO TO TABLE: ${appUser.currentTableNumber}',
+                                      style: const TextStyle(fontSize: 40),
+                                    ),
                           const SizedBox(height: 50),
                           ElevatedButton(
                             onPressed: () async {
-                              await ref.read(firebaseAuthInstanceProvider).signOut();
+                              await ref
+                                  .read(firebaseAuthInstanceProvider)
+                                  .signOut();
                             },
                             child: const Text('sign out'),
                           ),
