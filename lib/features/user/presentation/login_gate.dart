@@ -109,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginGate> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text(appName)),
-      backgroundColor: Colors.yellow,
+      //backgroundColor: Colors.yellow,
       body: StreamBuilder(
           stream: ref.watch(firebaseAuthInstanceProvider).authStateChanges(),
           builder: (context, snapshot) {

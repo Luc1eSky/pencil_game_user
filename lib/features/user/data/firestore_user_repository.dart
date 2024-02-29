@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../constants.dart';
 import '../../../firestore/firestore_instance_provider.dart';
-import '../../schedule/domain/schedule.dart';
+import '../../schedule/domain/schedule_parameters.dart';
 import '../domain/app_user.dart';
 
 class FirestoreUserRepository {
@@ -91,35 +91,34 @@ class FirestoreUserRepository {
       // add new (detailed) user doc to users sub-collection under experiment
       await experimentRef.collection(userCollectionName).doc(uuid).set(appUser.toFirestore());
 
-      // TODO: MOVE TO SCHEDULE REPOSITORY
-      // TODO: CREATE SERVICE THAT COMBINES REPOSITORIES
+      // TODO: AUTOMATE WITH CLOUD FUNCTION
       // start transaction to keep track of user count in schedule
-      final scheduleRef = experimentRef.collection('schedule').doc('schedule');
+      final parameterRef = experimentRef.collection(settingsCollectionName).doc(parameterDocName);
       _firestore.runTransaction((transaction) async {
         // get experiment document
-        final scheduleDoc = await transaction.get(scheduleRef);
+        final parameterDoc = await transaction.get(parameterRef);
 
         // exit if it does not exist
-        if (!scheduleDoc.exists) {
+        if (!parameterDoc.exists) {
           throw Exception('Schedule document for experiment $experimentDocId does not exist.');
         }
         // exit if there is no data
-        if (scheduleDoc.data() == null) {
+        if (parameterDoc.data() == null) {
           throw Exception('Schedule document for experiment $experimentDocId has no data.');
         }
 
         // get current schedule
-        final currentSchedule = Schedule.fromJson(scheduleDoc.data()!);
+        final currentParameters = ScheduleParameters.fromJson(parameterDoc.data()!);
 
-        // get current color code list and update it
-        final colorCodeList = [...currentSchedule.playerColorCodes];
-        colorCodeList.add(appUser.colorCode);
+        // get set of current users and update it
+        final users = {...currentParameters.allActiveUsers};
+        users.add(appUser);
 
         // create updated schedule
-        final updatedSchedule = currentSchedule.copyWith(playerColorCodes: colorCodeList);
+        final updatedParameters = currentParameters.copyWith(allActiveUsers: users);
 
         // update schedule doc with new user count and color color code list
-        transaction.update(scheduleRef, updatedSchedule.toJson());
+        transaction.update(parameterRef, updatedParameters.toJson());
       });
 
       return true;

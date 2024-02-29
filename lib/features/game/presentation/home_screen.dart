@@ -15,10 +15,21 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userUid = ref.watch(firebaseAuthInstanceProvider).currentUser!.uid;
     return Center(
-      child: Column(
-        children: [
-          StreamBuilder(
-              stream: ref.read(firestoreUserRepositoryProvider).getUserDocStream(userUid),
+      child: StreamBuilder(
+          stream: ref.read(firestoreUserRepositoryProvider).getUserDocStream(userUid),
+          builder: (context, snapshot) {
+            if (snapshot.hasError || !snapshot.hasData) {
+              return Container();
+            }
+            if (snapshot.data!.data() == null) {
+              return Container();
+            }
+            final experimentDocId = snapshot.data!.data()!['experimentDocId'];
+
+            return StreamBuilder<DocumentSnapshot<AppUser>>(
+              stream: ref
+                  .read(firestoreUserRepositoryProvider)
+                  .getDetailedUserDocStream(experimentDocId, userUid),
               builder: (context, snapshot) {
                 if (snapshot.hasError || !snapshot.hasData) {
                   return Container();
@@ -26,46 +37,49 @@ class HomeScreen extends ConsumerWidget {
                 if (snapshot.data!.data() == null) {
                   return Container();
                 }
-                final experimentDocId = snapshot.data!.data()!['experimentDocId'];
+                final appUser = snapshot.data!.data()!;
 
-                return StreamBuilder<DocumentSnapshot<AppUser>>(
-                  stream: ref
-                      .read(firestoreUserRepositoryProvider)
-                      .getDetailedUserDocStream(experimentDocId, userUid),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError || !snapshot.hasData) {
-                      return Container();
-                    }
-                    if (snapshot.data!.data() == null) {
-                      return Container();
-                    }
-                    final appUser = snapshot.data!.data()!;
-
-                    return Text(
-                      '${appUser.firstName} ${appUser.lastName} / ${appUser.colorCode}',
-                      style: const TextStyle(fontSize: 30),
-                    );
-                  },
+                return Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    Text(
+                      'Your Color: ${appUser.colorCode}',
+                      style: const TextStyle(fontSize: 40),
+                    ),
+                    Text(
+                      '${appUser.firstName} ${appUser.lastName.substring(0, 1)}.',
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (appUser.currentTableNumber != null)
+                            appUser.currentTableNumber == 0
+                                ? const Text(
+                                    'YOU ARE PAUSING THIS ROUND.',
+                                    style: TextStyle(fontSize: 30),
+                                  )
+                                : Text(
+                                    'GO TO TABLE: ${appUser.currentTableNumber}',
+                                    style: const TextStyle(fontSize: 40),
+                                  ),
+                          const SizedBox(height: 50),
+                          ElevatedButton(
+                            onPressed: () async {
+                              await ref.read(firebaseAuthInstanceProvider).signOut();
+                            },
+                            child: const Text('sign out'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 );
-              }),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // const JoinTableWidget(),
-                // const SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: () async {
-                    await ref.read(firebaseAuthInstanceProvider).signOut();
-                  },
-                  child: const Text('sign out'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+              },
+            );
+          }),
     );
   }
 }
