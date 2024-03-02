@@ -22,7 +22,6 @@ class AppUser with _$AppUser {
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
 
   factory AppUser.fromFirestore(Map<String, dynamic> firestoreMap, String uid) {
-    firestoreMap.remove('code');
     firestoreMap['uid'] = uid;
     return AppUser.fromJson(firestoreMap);
   }
@@ -32,4 +31,17 @@ class AppUser with _$AppUser {
     jsonMap.remove('uid');
     return jsonMap;
   }
+
+  String get shortNameString => '$firstName ${lastName.substring(0, 1)}.';
+  String get fullNameString => '$firstName $lastName';
+
+  // only consider uid for equality
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is AppUser && runtimeType == other.runtimeType && uid == other.uid;
+  }
+
+  @override
+  int get hashCode => uid.hashCode;
 }

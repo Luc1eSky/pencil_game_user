@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../authorize/data/firestore_auth_instance_provider.dart';
+import '../../tables/presentation/join_table_widget.dart';
 import '../../user/data/firestore_user_repository.dart';
 import '../../user/domain/app_user.dart';
 
@@ -16,30 +17,40 @@ class HomeScreen extends ConsumerWidget {
     final userUid = ref.watch(firebaseAuthInstanceProvider).currentUser!.uid;
     return Center(
       child: StreamBuilder(
-          stream: ref
-              .read(firestoreUserRepositoryProvider)
-              .getUserDocStream(userUid),
+          stream: ref.read(firestoreUserRepositoryProvider).getUserDocStream(userUid),
           builder: (context, snapshot) {
-            if (snapshot.hasError || !snapshot.hasData) {
-              return Container();
+            if (snapshot.hasError) {
+              return const Text('Error with user data stream.');
             }
-            if (snapshot.data!.data() == null) {
-              return Container();
+            if (!snapshot.hasData || snapshot.data == null) {
+              return const Center(child: CircularProgressIndicator());
             }
-            final experimentDocId = snapshot.data!.data()!['experimentDocId'];
+            String experimentDocId;
+            try {
+              experimentDocId = snapshot.data!.data()!['experimentDocId'];
+            } catch (e) {
+              return const Text('Error - Could not find experiment ID.');
+            }
 
             return StreamBuilder<DocumentSnapshot<AppUser>>(
               stream: ref
                   .read(firestoreUserRepositoryProvider)
                   .getDetailedUserDocStream(experimentDocId, userUid),
               builder: (context, snapshot) {
-                if (snapshot.hasError || !snapshot.hasData) {
-                  return Container();
+                if (snapshot.hasError) {
+                  return const Text('Error with detailed user data stream.');
                 }
-                if (snapshot.data!.data() == null) {
-                  return Container();
+                if (!snapshot.hasData || snapshot.data == null) {
+                  return const Center(child: CircularProgressIndicator());
                 }
-                final appUser = snapshot.data!.data()!;
+                AppUser appUser;
+                try {
+                  appUser = snapshot.data!.data()!;
+                } catch (e) {
+                  return Text('Error with user object: ${e.toString()}');
+                }
+
+                final tableNumber = appUser.currentTableNumber;
 
                 return Column(
                   children: [
@@ -57,29 +68,17 @@ class HomeScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          appUser.currentTableNumber == null
-                              ? const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text(
-                                    'PLEASE WAIT YOUR SEAT IS BEING ASSIGNED.',
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                )
-                              : appUser.currentTableNumber == 0
-                                  ? const Text(
-                                      'YOU ARE PAUSING THIS ROUND.',
-                                      style: TextStyle(fontSize: 30),
-                                    )
-                                  : Text(
-                                      'GO TO TABLE: ${appUser.currentTableNumber}',
-                                      style: const TextStyle(fontSize: 40),
-                                    ),
-                          const SizedBox(height: 50),
+                          JoinTableWidget(
+                            user: appUser,
+                            tableNumber: tableNumber,
+                            experimentDocId: experimentDocId,
+                          ),
+                          const SizedBox(height: 100),
                           ElevatedButton(
                             onPressed: () async {
-                              await ref
-                                  .read(firebaseAuthInstanceProvider)
-                                  .signOut();
+                              // TODO: CHANGE USER STATUS
+                              //  TODO: ALLOW SIGN OUT?!
+                              await ref.read(firebaseAuthInstanceProvider).signOut();
                             },
                             child: const Text('sign out'),
                           ),

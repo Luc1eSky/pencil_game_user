@@ -7,7 +7,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pencil_game_user/main_old.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
