@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pencil_game_user/features/authorize/data/firestore_auth_instance_provider.dart';
 
 import '../../../constants.dart';
+import '../../authorize/data/firestore_auth_instance_provider.dart';
 import '../../game/presentation/home_screen.dart';
+import '../../user/presentation/signed_out_screen.dart';
 import '../data/firestore_user_repository.dart';
 import '../domain/login_status.dart';
 import 'loading_screen.dart';
 import 'manual_login_screen.dart';
-import 'signed_out_screen.dart';
 
 class LoginGate extends ConsumerStatefulWidget {
   const LoginGate({super.key, required this.userCode});
@@ -66,7 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginGate> {
       // if code was given, but code is not valid
       if (!userCodeIsValid) {
         // show error in snack bar
-        if (context.mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.red,
@@ -86,7 +86,7 @@ class _LoginScreenState extends ConsumerState<LoginGate> {
       // show error if anything went wrong
       if (!hasCreatedUserDoc) {
         // show error in snack bar
-        if (context.mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               backgroundColor: Colors.red,
@@ -108,32 +108,34 @@ class _LoginScreenState extends ConsumerState<LoginGate> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(appName)),
+      //appBar: AppBar(title: const Text(appName)),
       //backgroundColor: Colors.yellow,
       body: StreamBuilder(
-          stream: ref.watch(firebaseAuthInstanceProvider).authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return const Text('Error.', style: TextStyle(fontSize: 30));
-            }
-            // user is signed out
-            if (!snapshot.hasData) {
-              // either loading or done
-              return loginStatus == LoginStatus.loading
-                  ? const LoadingScreen()
-                  : const SignedOutScreen();
-            }
-            // user is signed in
-            // show screen based on login status
-            switch (loginStatus) {
-              case LoginStatus.loading:
-                return const LoadingScreen();
-              case LoginStatus.showManualLogin:
-                return const ManualLoginScreen();
-              case LoginStatus.loggedIn:
-                return const HomeScreen();
-            }
-          }),
+        stream: ref.watch(firebaseAuthInstanceProvider).authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Auth State Error.', style: TextStyle(fontSize: 30));
+          }
+          // user is signed out
+          if (!snapshot.hasData) {
+            // either loading or done
+            return loginStatus == LoginStatus.loading
+                ? const LoadingScreen()
+                : const SignedOutScreen();
+          }
+
+          // user is signed in
+          // show screen based on login status
+          switch (loginStatus) {
+            case LoginStatus.loading:
+              return const LoadingScreen();
+            case LoginStatus.showManualLogin:
+              return const ManualLoginScreen();
+            case LoginStatus.loggedIn:
+              return const HomeScreen();
+          }
+        },
+      ),
     );
   }
 }

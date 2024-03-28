@@ -13,3 +13,16 @@ class TimestampConverter implements JsonConverter<DateTime, Timestamp> {
   @override
   Timestamp toJson(DateTime date) => Timestamp.fromDate(date);
 }
+
+/// converter to save DateTime objects as milliseconds since epoch
+class DatetimeToMillisecondsConverter implements JsonConverter<DateTime, int> {
+  const DatetimeToMillisecondsConverter();
+
+  @override
+  DateTime fromJson(int millisecondsSinceEpoch) {
+    return DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
+  }
+
+  @override
+  int toJson(DateTime date) => date.millisecondsSinceEpoch;
+}

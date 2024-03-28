@@ -3,6 +3,8 @@ const appName = 'Pencil Game User';
 const appBarHeight = 60.0;
 const noCodePlaceholder = 'noCode';
 
+const catchUpDelayInMilliseconds = 250;
+
 // database collection and field names
 const adminsCollectionName = 'admins';
 const experimentCollectionName = 'experiments';

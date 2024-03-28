@@ -3,9 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../constants.dart';
-import '../../../firestore/firestore_instance_provider.dart';
+import '../../../firebase/firestore_instance_provider.dart';
 import '../../schedule/domain/schedule_parameters.dart';
 import '../domain/app_user.dart';
+import '../domain/simple_user.dart';
 
 class FirestoreUserRepository {
   FirestoreUserRepository(this._firestore);
@@ -18,13 +19,7 @@ class FirestoreUserRepository {
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> getUserDocStream(String uid) {
-    return _firestore
-        .collection(userCollectionName)
-        .doc(uid)
-        // .withConverter(
-        //     fromFirestore: (snapshot, _) => AppUser.fromFirestore(snapshot.data()!, uid),
-        //     toFirestore: (appUser, _) => appUser.toFirestore())
-        .snapshots();
+    return _firestore.collection(userCollectionName).doc(uid).snapshots();
   }
 
   Stream<DocumentSnapshot<AppUser>> getDetailedUserDocStream(String experimentDocId, String uid) {
@@ -94,34 +89,40 @@ class FirestoreUserRepository {
       // TODO: AUTOMATE WITH CLOUD FUNCTION
       // start transaction to keep track of user count in schedule
       final parameterRef = experimentRef.collection(settingsCollectionName).doc(parameterDocName);
-      _firestore.runTransaction((transaction) async {
+      final transactionWasSuccessful = await _firestore.runTransaction((transaction) async {
         // get experiment document
         final parameterDoc = await transaction.get(parameterRef);
 
         // exit if it does not exist
         if (!parameterDoc.exists) {
-          throw Exception('Schedule document for experiment $experimentDocId does not exist.');
+          return false;
+          //throw Exception('Schedule document for experiment $experimentDocId does not exist.');
         }
         // exit if there is no data
         if (parameterDoc.data() == null) {
-          throw Exception('Schedule document for experiment $experimentDocId has no data.');
+          return false;
+          //throw Exception('Schedule document for experiment $experimentDocId has no data.');
         }
 
-        // get current schedule
+        // get current parameters
         final currentParameters = ScheduleParameters.fromJson(parameterDoc.data()!);
+
+        // convert user to simple user
+        final simpleUser = SimpleUser.fromAppUser(appUser);
 
         // get set of current users and update it
         final users = {...currentParameters.allActiveUsers};
-        users.add(appUser);
+        users.add(simpleUser);
 
         // create updated schedule
         final updatedParameters = currentParameters.copyWith(allActiveUsers: users);
 
         // update schedule doc with new user count and color color code list
         transaction.update(parameterRef, updatedParameters.toJson());
+        return true;
       });
 
-      return true;
+      return transactionWasSuccessful;
     } catch (error) {
       debugPrint('$error');
       return false;

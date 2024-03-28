@@ -1,14 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pencil_game_user/routing/app_router.dart';
 import 'package:url_strategy/url_strategy.dart';
 
+import 'firebase/database_time_offset_provider.dart';
 import 'firebase_options.dart';
-
-FirebaseDatabase database = FirebaseDatabase.instance;
-final DatabaseReference valueRef = database.ref('value');
+import 'routing/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +14,7 @@ void main() async {
   );
   // remove # from URL path
   setPathUrlStrategy();
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -26,6 +24,11 @@ class MyApp extends ConsumerWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // initialize listener to keep track of database delay
+    // this is important to compensate for different clocks
+    final container = ProviderScope.containerOf(context);
+    container.read(databaseTimeOffsetRepositoryProvider.notifier).listenToDatabaseOffset();
+
     final goRouter = ref.watch(goRouterProvider);
     return MaterialApp.router(
       routerConfig: goRouter,
