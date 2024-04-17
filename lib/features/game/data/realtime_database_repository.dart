@@ -73,6 +73,12 @@ class RealtimeDatabaseRepository {
       // convert data to table object
       final table = RealtimeTable.fromJson(tableValue as Map<String, dynamic>);
 
+      // exit if table was finished already
+      if (table.status == TableStatus.finished) {
+        return Transaction.abort();
+        // NO FOLLOW UP
+      }
+
       // create new click object
       final newClick = Click(
         user: user,
@@ -85,7 +91,6 @@ class RealtimeDatabaseRepository {
 
       // archive click in case any user has pen already
       if (table.someOneHasPen) {
-        print('SOMEONE HAS PEN...ARCHIVE CLICK');
         final updatedTable = _addClicks(table: table, clicks: [newClickFail]);
         return Transaction.success(updatedTable.toJson());
         // NO FOLLOW UP
@@ -96,13 +101,12 @@ class RealtimeDatabaseRepository {
       if (lastClick != null) {
         // check if same user clicked already
         if (lastClick.user == user) {
-          print('SAME USER!!');
           final updatedTable = _addClicks(table: table, clicks: [newClickFail]);
           return Transaction.success(updatedTable.toJson());
           // NO FOLLOW UP
         }
 
-        print('COMPARING TWO CLICKS AND RESOLVING ACTION!!!');
+        // comparing two clicks and resolving action
         final String winningUid;
         List<Click> listOfAddedClicks;
         if (lastClick.timestamp.isBefore(newClick.timestamp)) {
@@ -129,7 +133,6 @@ class RealtimeDatabaseRepository {
 
       // if no one has pen and no click was registered yet
       // add click to table
-      print('ADD FIRST CLICK!');
       final updatedTable = table.copyWith(lastClick: newClick);
       shouldFollowUp = true;
       return Transaction.success(updatedTable.toJson());

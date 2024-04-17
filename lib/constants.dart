@@ -1,4 +1,5 @@
 const appName = 'Pencil Game User';
+const bool inDebuggingMode = true; // use emulators or not
 
 const appBarHeight = 60.0;
 const noCodePlaceholder = 'noCode';
