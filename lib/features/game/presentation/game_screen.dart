@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart ';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_user/features/game/domain/realtime_table.dart';
 import 'package:pencil_game_user/features/game/presentation/number_input_widget.dart';

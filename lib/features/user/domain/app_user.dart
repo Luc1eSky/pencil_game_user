@@ -11,7 +11,6 @@ class AppUser with _$AppUser {
   const AppUser._();
   const factory AppUser({
     required String firstName,
-    required String lastName,
     required String uid,
     required String colorCode,
     required String experimentDocId,
@@ -31,9 +30,6 @@ class AppUser with _$AppUser {
     jsonMap.remove('uid');
     return jsonMap;
   }
-
-  String get shortNameString => '$firstName ${lastName.substring(0, 1)}.';
-  String get fullNameString => '$firstName $lastName';
 
   // only consider uid for equality
   @override

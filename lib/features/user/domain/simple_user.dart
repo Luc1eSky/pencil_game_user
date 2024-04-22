@@ -10,7 +10,6 @@ class SimpleUser with _$SimpleUser {
   const SimpleUser._();
   const factory SimpleUser({
     required String firstName,
-    required String lastName,
     required String uid,
     required String colorCode,
   }) = _SimpleUser;
@@ -19,10 +18,7 @@ class SimpleUser with _$SimpleUser {
 
   factory SimpleUser.fromAppUser(AppUser appUser) => SimpleUser(
         firstName: appUser.firstName,
-        lastName: appUser.lastName,
         uid: appUser.uid,
         colorCode: appUser.colorCode,
       );
-
-  String get shortNameString => '$firstName ${lastName.substring(0, 1)}.';
 }

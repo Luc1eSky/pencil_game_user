@@ -12,7 +12,7 @@ import '../../user/domain/simple_user.dart';
 import '../data/numbers_to_copy.dart';
 
 //const double numberGapWidthRatio = 0.08;
-const int numberDigitCount = 16;
+const int numberDigitCount = 8;
 
 const double numberWidgetMaxWidth = 400.0;
 const double gapToButtonRatio = 0.25;
@@ -80,14 +80,15 @@ class _NumberInputWidgetState extends State<NumberInputWidget> {
       return;
     }
     setState(
-      () => _currentString = _currentString.substring(0, _currentString.length - 1),
+      () => _currentString =
+          _currentString.substring(0, _currentString.length - 1),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final NumberCopyResult? myNumberResults =
-        widget.numberCopyResults?.firstWhereOrNull((result) => result.user == widget.user);
+    final NumberCopyResult? myNumberResults = widget.numberCopyResults
+        ?.firstWhereOrNull((result) => result.user == widget.user);
     final submittedNumbersCount = myNumberResults?.numbersCount ?? 0;
     final correctAnswersCount = myNumberResults?.correctAnswersCount ?? 0;
 
@@ -97,18 +98,21 @@ class _NumberInputWidgetState extends State<NumberInputWidget> {
       alignment: Alignment.bottomCenter,
       child: Column(
         children: [
-          Text('numbers submitted: $submittedNumbersCount'),
-          Text('numbers correct: $correctAnswersCount'),
+          //Text('numbers submitted: $submittedNumbersCount'),
+          //Text('numbers correct: $correctAnswersCount'),
           Expanded(
             child: FractionallySizedBox(
               widthFactor: 0.9,
               heightFactor: 0.9,
               child: LayoutBuilder(builder: (context, constraints) {
-                final availableWidth = min(constraints.maxWidth, numberWidgetMaxWidth);
+                final availableWidth =
+                    min(constraints.maxWidth, numberWidgetMaxWidth);
                 final availableHeight = constraints.maxHeight;
                 final widthLimitedButtonSize = availableWidth / totalWidthRatio;
-                final heightLimitedButtonSize = availableHeight / totalHeightRatio;
-                final limitedButtonSize = min(widthLimitedButtonSize, heightLimitedButtonSize);
+                final heightLimitedButtonSize =
+                    availableHeight / totalHeightRatio;
+                final limitedButtonSize =
+                    min(widthLimitedButtonSize, heightLimitedButtonSize);
                 final limitedGapSize = limitedButtonSize * gapToButtonRatio;
                 final limitedPadding = limitedButtonSize * paddingToButtonRatio;
                 return Center(
@@ -117,8 +121,8 @@ class _NumberInputWidgetState extends State<NumberInputWidget> {
                     height: limitedButtonSize * totalHeightRatio,
                     decoration: BoxDecoration(
                       color: ColorPalette().numberWidgetBackGround,
-                      borderRadius:
-                          BorderRadius.circular(limitedButtonSize * outerRadiusToButtonRatio),
+                      borderRadius: BorderRadius.circular(
+                          limitedButtonSize * outerRadiusToButtonRatio),
                     ),
                     child: Padding(
                       padding: EdgeInsets.all(limitedPadding),
@@ -168,12 +172,14 @@ class _NumberInputWidgetState extends State<NumberInputWidget> {
                           SizedBox(height: limitedGapSize),
                           Expanded(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: limitedGapSize),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: limitedGapSize),
                               child: GridView.builder(
                                 physics: const NeverScrollableScrollPhysics(),
                                 reverse: true,
                                 itemCount: 12,
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 3,
                                   mainAxisSpacing: limitedGapSize,
                                   crossAxisSpacing: limitedGapSize,
@@ -214,15 +220,19 @@ class _NumberInputWidgetState extends State<NumberInputWidget> {
                                             color: Colors.white,
                                             onPressed: () async {
                                               await ref
-                                                  .read(realtimeDatabaseRepositoryProvider)
+                                                  .read(
+                                                      realtimeDatabaseRepositoryProvider)
                                                   .addNumberInput(
-                                                    experimentDocId: widget.experimentDocId,
-                                                    tableNumber: widget.tableNumber,
+                                                    experimentDocId:
+                                                        widget.experimentDocId,
+                                                    tableNumber:
+                                                        widget.tableNumber,
                                                     user: widget.user,
                                                     solution: _currentSolution,
                                                     input: _currentString,
                                                   );
-                                              setState(() => _currentString = '');
+                                              setState(
+                                                  () => _currentString = '');
                                             },
                                             icon: const FractionallySizedBox(
                                               widthFactor: 0.7,

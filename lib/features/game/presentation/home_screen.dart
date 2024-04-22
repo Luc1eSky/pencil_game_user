@@ -26,7 +26,8 @@ class HomeScreen extends ConsumerWidget {
     final userUid = ref.watch(firebaseAuthInstanceProvider).currentUser!.uid;
     return Center(
       child: StreamBuilder(
-        stream: ref.read(firestoreUserRepositoryProvider).getUserDocStream(userUid),
+        stream:
+            ref.read(firestoreUserRepositoryProvider).getUserDocStream(userUid),
         builder: (context, userSnap) {
           if (userSnap.hasError) {
             return const Text('Error with user data stream.');
@@ -42,8 +43,9 @@ class HomeScreen extends ConsumerWidget {
           }
 
           return StreamBuilder(
-              stream:
-                  ref.read(firestoreSurveyRepositoryProvider).getSurveyDocStream(experimentDocId),
+              stream: ref
+                  .read(firestoreSurveyRepositoryProvider)
+                  .getSurveyDocStream(experimentDocId),
               builder: (context, surveySnap) {
                 if (surveySnap.hasError) {
                   return const Text('Error with survey stream.');
@@ -88,7 +90,8 @@ class HomeScreen extends ConsumerWidget {
                       .getDetailedUserDocStream(experimentDocId, userUid),
                   builder: (context, appUserSnap) {
                     if (appUserSnap.hasError) {
-                      return const Text('Error with detailed user data stream.');
+                      return const Text(
+                          'Error with detailed user data stream.');
                     }
                     if (!appUserSnap.hasData) {
                       return const Center(child: CircularProgressIndicator());
@@ -123,7 +126,7 @@ class HomeScreen extends ConsumerWidget {
                                 style: TextStyle(fontSize: 36),
                               ),
                               TextSpan(
-                                text: '${appUser.firstName} ${appUser.lastName.substring(0, 1)}.',
+                                text: appUser.firstName,
                                 style: const TextStyle(fontSize: 18),
                               ),
                             ],
@@ -133,7 +136,9 @@ class HomeScreen extends ConsumerWidget {
                           if (inDebuggingMode)
                             IconButton(
                               onPressed: () async {
-                                await ref.read(firebaseAuthInstanceProvider).signOut();
+                                await ref
+                                    .read(firebaseAuthInstanceProvider)
+                                    .signOut();
                               },
                               icon: const Icon(Icons.exit_to_app),
                             ),
@@ -141,15 +146,18 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       body: Center(
                         child: tableNumber == null
-                            ? const Text('Please wait while your table is being assigned.')
+                            ? const Text(
+                                'Please wait while your table is being assigned.')
                             : tableNumber == 0
                                 ? const Text('You are pausing this round.')
                                 : StreamBuilder(
-                                    stream:
-                                        ref.read(realtimeDatabaseRepositoryProvider).getTableStream(
-                                              experimentDocId: experimentDocId,
-                                              tableNumber: tableNumber,
-                                            ),
+                                    stream: ref
+                                        .read(
+                                            realtimeDatabaseRepositoryProvider)
+                                        .getTableStream(
+                                          experimentDocId: experimentDocId,
+                                          tableNumber: tableNumber,
+                                        ),
                                     builder: (context, realtimeSnap) {
                                       if (realtimeSnap.hasError) {
                                         return Text(
@@ -158,7 +166,8 @@ class HomeScreen extends ConsumerWidget {
                                       if (!realtimeSnap.hasData) {
                                         return const CircularProgressIndicator();
                                       }
-                                      final dataSnap = realtimeSnap.data?.snapshot;
+                                      final dataSnap =
+                                          realtimeSnap.data?.snapshot;
                                       if (dataSnap?.value == null) {
                                         return const Text('Error - No data!');
                                       }
@@ -166,10 +175,11 @@ class HomeScreen extends ConsumerWidget {
                                       // try to convert streamed data to RealtimeTable object
                                       RealtimeTable table;
                                       try {
-                                        table = RealtimeTable.fromJson(
-                                            dataSnap!.value as Map<String, dynamic>);
+                                        table = RealtimeTable.fromJson(dataSnap!
+                                            .value as Map<String, dynamic>);
                                       } catch (e) {
-                                        return Text('Realtime table object error: $e');
+                                        return Text(
+                                            'Realtime table object error: $e');
                                       }
 
                                       // show widget if user is not yet at table
@@ -177,16 +187,20 @@ class HomeScreen extends ConsumerWidget {
                                         return Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('Please go to table $tableNumber'),
+                                            Text(
+                                                'Please go to table $tableNumber'),
                                             const SizedBox(height: 30),
                                             ElevatedButton(
                                               onPressed: () async {
                                                 try {
                                                   await ref
-                                                      .read(realtimeDatabaseRepositoryProvider)
+                                                      .read(
+                                                          realtimeDatabaseRepositoryProvider)
                                                       .joinTable(
-                                                        experimentDocId: experimentDocId,
-                                                        tableNumber: tableNumber,
+                                                        experimentDocId:
+                                                            experimentDocId,
+                                                        tableNumber:
+                                                            tableNumber,
                                                         user: simpleUser,
                                                       );
                                                 } catch (e) {
@@ -204,21 +218,25 @@ class HomeScreen extends ConsumerWidget {
 
                                       switch (tableStatus) {
                                         case TableStatus.waiting:
-                                          return Text('Waiting at table $tableNumber');
+                                          return Text(
+                                              'Waiting at table $tableNumber');
                                         case TableStatus.playing:
                                           return GameScreenOrError(
                                             experimentDocId: experimentDocId,
                                             table: table,
                                             user: simpleUser,
-                                            databaseOffset:
-                                                ref.watch(databaseTimeOffsetRepositoryProvider),
+                                            databaseOffset: ref.watch(
+                                                databaseTimeOffsetRepositoryProvider),
                                           );
                                         case TableStatus.aborted:
-                                          return Text('Game at table $tableNumber was cancelled.');
+                                          return Text(
+                                              'Game at table $tableNumber was cancelled.');
                                         case TableStatus.finished:
-                                          return Text('Game at table $tableNumber was finished.');
+                                          return Text(
+                                              'Game at table $tableNumber was finished.');
                                         case TableStatus.resultsCopied:
-                                          return Text('Results of table $tableNumber were copied.');
+                                          return Text(
+                                              'Results of table $tableNumber were copied.');
                                       }
                                     },
                                   ),
