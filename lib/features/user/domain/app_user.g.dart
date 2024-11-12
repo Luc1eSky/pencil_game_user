@@ -12,7 +12,7 @@ _$AppUserImpl _$$AppUserImplFromJson(Map<String, dynamic> json) =>
       uid: json['uid'] as String,
       colorCode: json['colorCode'] as String,
       experimentDocId: json['experimentDocId'] as String,
-      currentTableNumber: json['currentTableNumber'] as int?,
+      currentTableNumber: (json['currentTableNumber'] as num?)?.toInt(),
       createdOn:
           const TimestampConverter().fromJson(json['createdOn'] as Timestamp),
     );

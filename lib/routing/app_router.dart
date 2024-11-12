@@ -16,10 +16,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // route to login page for user
       routes: [
         GoRoute(
-          path: '/${AppRoute.login.name}/:uid',
+          path: '/${AppRoute.login.name}/:shareCode',
           name: AppRoute.login.name,
           builder: (context, state) {
-            return LoginGate(userCode: state.pathParameters['uid']);
+            return LoginGate(userCode: state.pathParameters['shareCode']);
           },
         ),
         // GoRoute(

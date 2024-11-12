@@ -78,7 +78,7 @@ class _LoginScreenState extends ConsumerState<LoginGate> {
         setState(() => loginStatus = LoginStatus.showManualLogin);
         return;
       }
-      // if code as given and is valid => try to create user doc from code + uuid
+      // if code was given and is valid => try to create user doc from code + uuid
       final hasCreatedUserDoc = await ref
           .read(firestoreUserRepositoryProvider)
           .createUserDocFromCode(shareCode: userCode, uuid: userUid);

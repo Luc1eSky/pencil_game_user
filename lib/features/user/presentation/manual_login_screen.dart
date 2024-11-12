@@ -8,6 +8,7 @@ class ManualLoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
+      // TODO: REPLACE WITH MANUAL LOGIN UI
       child: Text(
         'MANUAL LOGIN',
         style: TextStyle(fontSize: 30),

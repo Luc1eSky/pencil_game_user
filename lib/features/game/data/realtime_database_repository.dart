@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_user/features/game/domain/number_copy_result.dart';
@@ -37,7 +39,8 @@ class RealtimeDatabaseRepository {
 
     // convert to table
     final dataSnap = await tableRef.get();
-    final table = RealtimeTable.fromJson(dataSnap.value as Map<String, dynamic>);
+    final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(dataSnap.value));
+    final table = RealtimeTable.fromJson(convertedData);
     // get a copy of the current users set
     final currentUsersAtTable = table.usersAtTable ?? {};
     final usersAtTableCopy = {...currentUsersAtTable};
@@ -50,7 +53,7 @@ class RealtimeDatabaseRepository {
     await tableRef.update(updatedTable.toJson());
   }
 
-  /// add user to a specific table in a specific experiment
+  /// try to grab the pen
   Future<bool> tryToGrabPen({
     required String experimentDocId,
     required int tableNumber,
@@ -71,7 +74,8 @@ class RealtimeDatabaseRepository {
       }
 
       // convert data to table object
-      final table = RealtimeTable.fromJson(tableValue as Map<String, dynamic>);
+      final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(tableValue));
+      final table = RealtimeTable.fromJson(convertedData);
 
       // exit if table was finished already
       if (table.status == TableStatus.finished) {
@@ -89,12 +93,13 @@ class RealtimeDatabaseRepository {
       final newClickFail = newClick.copyWith(type: ClickType.grabPenFail);
       final newClickSuccess = newClick.copyWith(type: ClickType.grabPenSuccess);
 
-      // archive click in case any user has pen already
-      if (table.someOneHasPen) {
-        final updatedTable = _addClicks(table: table, clicks: [newClickFail]);
-        return Transaction.success(updatedTable.toJson());
-        // NO FOLLOW UP
-      }
+      // TODO: REALLY ALLOW STEALING?
+      // // archive click in case any user has pen already
+      // if (table.someOneHasPen) {
+      //   final updatedTable = _addClicks(table: table, clicks: [newClickFail]);
+      //   return Transaction.success(updatedTable.toJson());
+      //   // NO FOLLOW UP
+      // }
 
       // check if a click already exists
       final lastClick = table.lastClick;
@@ -159,7 +164,8 @@ class RealtimeDatabaseRepository {
       }
 
       // convert data to table object and get last click
-      final table = RealtimeTable.fromJson(tableValue as Map<String, dynamic>);
+      final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(tableValue));
+      final table = RealtimeTable.fromJson(convertedData);
       final lastClick = table.lastClick;
 
       // exit in case there is no click to process anymore
@@ -200,7 +206,8 @@ class RealtimeDatabaseRepository {
       }
 
       // convert data to table object
-      final table = RealtimeTable.fromJson(tableValue as Map<String, dynamic>);
+      final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(tableValue));
+      final table = RealtimeTable.fromJson(convertedData);
 
       // exit in case user does not have pen anymore
       if (!table.userHasPen(user)) {
@@ -266,8 +273,10 @@ class RealtimeDatabaseRepository {
       // otherwise convert data to table object and get last click
       final currentResultsList = currentValue as List<dynamic>;
       // get all results for all users
-      final currentResults =
-          currentResultsList.map((result) => NumberCopyResult.fromJson(result)).toList();
+      final currentResults = currentResultsList.map((result) {
+        final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(result));
+        return NumberCopyResult.fromJson(convertedData);
+      }).toList();
       // get index of entry for specific user
       final myResultIndex = currentResults.indexWhere((result) => result.user == user);
 
