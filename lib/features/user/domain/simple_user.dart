@@ -12,13 +12,16 @@ class SimpleUser with _$SimpleUser {
     required String firstName,
     required String uid,
     required String colorCode,
+    required bool? surveySubmitted,
   }) = _SimpleUser;
 
-  factory SimpleUser.fromJson(Map<String, dynamic> json) => _$SimpleUserFromJson(json);
+  factory SimpleUser.fromJson(Map<String, dynamic> json) =>
+      _$SimpleUserFromJson(json);
 
   factory SimpleUser.fromAppUser(AppUser appUser) => SimpleUser(
         firstName: appUser.firstName,
         uid: appUser.uid,
         colorCode: appUser.colorCode,
+        surveySubmitted: appUser.surveySubmitted,
       );
 }

@@ -25,6 +25,8 @@ mixin _$AppUser {
   String get colorCode => throw _privateConstructorUsedError;
   String get experimentDocId => throw _privateConstructorUsedError;
   int? get currentTableNumber => throw _privateConstructorUsedError;
+  bool get surveySubmitted => throw _privateConstructorUsedError;
+  bool get showSurvey => throw _privateConstructorUsedError;
   @TimestampConverter()
   DateTime get createdOn => throw _privateConstructorUsedError;
 
@@ -48,6 +50,8 @@ abstract class $AppUserCopyWith<$Res> {
       String colorCode,
       String experimentDocId,
       int? currentTableNumber,
+      bool surveySubmitted,
+      bool showSurvey,
       @TimestampConverter() DateTime createdOn});
 }
 
@@ -71,6 +75,8 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
     Object? colorCode = null,
     Object? experimentDocId = null,
     Object? currentTableNumber = freezed,
+    Object? surveySubmitted = null,
+    Object? showSurvey = null,
     Object? createdOn = null,
   }) {
     return _then(_value.copyWith(
@@ -94,6 +100,14 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
           ? _value.currentTableNumber
           : currentTableNumber // ignore: cast_nullable_to_non_nullable
               as int?,
+      surveySubmitted: null == surveySubmitted
+          ? _value.surveySubmitted
+          : surveySubmitted // ignore: cast_nullable_to_non_nullable
+              as bool,
+      showSurvey: null == showSurvey
+          ? _value.showSurvey
+          : showSurvey // ignore: cast_nullable_to_non_nullable
+              as bool,
       createdOn: null == createdOn
           ? _value.createdOn
           : createdOn // ignore: cast_nullable_to_non_nullable
@@ -115,6 +129,8 @@ abstract class _$$AppUserImplCopyWith<$Res> implements $AppUserCopyWith<$Res> {
       String colorCode,
       String experimentDocId,
       int? currentTableNumber,
+      bool surveySubmitted,
+      bool showSurvey,
       @TimestampConverter() DateTime createdOn});
 }
 
@@ -136,6 +152,8 @@ class __$$AppUserImplCopyWithImpl<$Res>
     Object? colorCode = null,
     Object? experimentDocId = null,
     Object? currentTableNumber = freezed,
+    Object? surveySubmitted = null,
+    Object? showSurvey = null,
     Object? createdOn = null,
   }) {
     return _then(_$AppUserImpl(
@@ -159,6 +177,14 @@ class __$$AppUserImplCopyWithImpl<$Res>
           ? _value.currentTableNumber
           : currentTableNumber // ignore: cast_nullable_to_non_nullable
               as int?,
+      surveySubmitted: null == surveySubmitted
+          ? _value.surveySubmitted
+          : surveySubmitted // ignore: cast_nullable_to_non_nullable
+              as bool,
+      showSurvey: null == showSurvey
+          ? _value.showSurvey
+          : showSurvey // ignore: cast_nullable_to_non_nullable
+              as bool,
       createdOn: null == createdOn
           ? _value.createdOn
           : createdOn // ignore: cast_nullable_to_non_nullable
@@ -176,6 +202,8 @@ class _$AppUserImpl extends _AppUser {
       required this.colorCode,
       required this.experimentDocId,
       required this.currentTableNumber,
+      this.surveySubmitted = false,
+      this.showSurvey = false,
       @TimestampConverter() required this.createdOn})
       : super._();
 
@@ -193,12 +221,18 @@ class _$AppUserImpl extends _AppUser {
   @override
   final int? currentTableNumber;
   @override
+  @JsonKey()
+  final bool surveySubmitted;
+  @override
+  @JsonKey()
+  final bool showSurvey;
+  @override
   @TimestampConverter()
   final DateTime createdOn;
 
   @override
   String toString() {
-    return 'AppUser(firstName: $firstName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, currentTableNumber: $currentTableNumber, createdOn: $createdOn)';
+    return 'AppUser(firstName: $firstName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, currentTableNumber: $currentTableNumber, surveySubmitted: $surveySubmitted, showSurvey: $showSurvey, createdOn: $createdOn)';
   }
 
   /// Create a copy of AppUser
@@ -224,6 +258,8 @@ abstract class _AppUser extends AppUser {
       required final String colorCode,
       required final String experimentDocId,
       required final int? currentTableNumber,
+      final bool surveySubmitted,
+      final bool showSurvey,
       @TimestampConverter() required final DateTime createdOn}) = _$AppUserImpl;
   const _AppUser._() : super._();
 
@@ -239,6 +275,10 @@ abstract class _AppUser extends AppUser {
   String get experimentDocId;
   @override
   int? get currentTableNumber;
+  @override
+  bool get surveySubmitted;
+  @override
+  bool get showSurvey;
   @override
   @TimestampConverter()
   DateTime get createdOn;

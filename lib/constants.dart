@@ -17,3 +17,4 @@ const settingsCollectionName = 'settings';
 const scheduleDocName = 'schedule';
 const detailedScheduleDocName = 'detailedSchedule';
 const parameterDocName = 'parameters';
+const progressDocName = 'progress';

@@ -14,27 +14,36 @@ class FirestoreUserRepository {
 
   /// check if user document already exists
   Future<bool> userDocExists(String docId) async {
-    final docSnap = await _firestore.collection(userCollectionName).doc(docId).get();
+    final docSnap =
+        await _firestore.collection(userCollectionName).doc(docId).get();
     return docSnap.exists;
+  }
+
+  /// local helper function to get document reference
+  DocumentReference<Map<String, dynamic>> _getUserDocRef(String userDocId) {
+    return _firestore.collection(userCollectionName).doc(userDocId);
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> getUserDocStream(String uid) {
     return _firestore.collection(userCollectionName).doc(uid).snapshots();
   }
 
-  Stream<DocumentSnapshot<AppUser>> getDetailedUserDocStream(String experimentDocId, String uid) {
+  Stream<DocumentSnapshot<AppUser>> getDetailedUserDocStream(
+      String experimentDocId, String uid) {
     return _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
         .collection(userCollectionName)
         .doc(uid)
         .withConverter(
-            fromFirestore: (snapshot, _) => AppUser.fromFirestore(snapshot.data()!, uid),
+            fromFirestore: (snapshot, _) =>
+                AppUser.fromFirestore(snapshot.data()!, uid),
             toFirestore: (appUser, _) => appUser.toFirestore())
         .snapshots();
   }
 
-  Future<QuerySnapshot<Map<String, dynamic>>> _getUserShareCodeDoc(String shareCode) async {
+  Future<QuerySnapshot<Map<String, dynamic>>> _getUserShareCodeDoc(
+      String shareCode) async {
     return await _firestore
         .collection(userShareCodeCollectionName)
         .where('code', isEqualTo: shareCode)
@@ -46,6 +55,49 @@ class FirestoreUserRepository {
   Future<bool> userShareCodeDocExists(String shareCode) async {
     final querySnap = await _getUserShareCodeDoc(shareCode);
     return querySnap.docs.isNotEmpty && querySnap.docs.first.exists;
+  }
+
+  /// Get the current AppUser by UID
+  Future<AppUser?> getCurrentAppUser(String uid) async {
+    try {
+      final docSnap =
+          await _firestore.collection(userCollectionName).doc(uid).get();
+      if (docSnap.exists) {
+        return AppUser.fromFirestore(docSnap.data()!, uid);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching AppUser: $e');
+      return null;
+    }
+  }
+
+  /// Get the experiment ID from the current user's document
+  Future<String?> getExperimentId(String uid) async {
+    try {
+      final docSnap =
+          await _firestore.collection(userCollectionName).doc(uid).get();
+      if (docSnap.exists) {
+        final experimentDocId = docSnap.data()!['experimentDocId'];
+        //final appUser = AppUser.fromFirestore(docSnap.data()!, uid);
+        return experimentDocId;
+      }
+      return null; // User not found
+    } catch (e) {
+      debugPrint('Error fetching experiment ID: $e');
+      return null;
+    }
+  }
+
+  /// change user status if survey was submitted
+  Future<void> surveyWasSubmitted({
+    required String userId,
+  }) async {
+    // get doc ref of progress doc of specific experiment
+    final docRef = _getUserDocRef(userId);
+
+    // update doc with new status
+    docRef.update({'surveySubmitted': true});
   }
 
   /// create new user document from user share code and user uid
@@ -61,7 +113,8 @@ class FirestoreUserRepository {
 
       // throw exception if document was not found or is empty
       if (querySnap.docs.isEmpty || !querySnap.docs.first.exists) {
-        throw Exception('No documents for user share code $shareCode was found.');
+        throw Exception(
+            'No documents for user share code $shareCode was found.');
       }
 
       // get info from user share code doc
@@ -72,7 +125,8 @@ class FirestoreUserRepository {
 
       // get ref to experiment doc
       final experimentDocId = appUser.experimentDocId;
-      final experimentRef = _firestore.collection(experimentCollectionName).doc(experimentDocId);
+      final experimentRef =
+          _firestore.collection(experimentCollectionName).doc(experimentDocId);
 
       // delete user share code doc
       await querySnap.docs.first.reference.delete();
@@ -84,12 +138,18 @@ class FirestoreUserRepository {
       });
 
       // add new (detailed) user doc to users sub-collection under experiment
-      await experimentRef.collection(userCollectionName).doc(uuid).set(appUser.toFirestore());
+      await experimentRef
+          .collection(userCollectionName)
+          .doc(uuid)
+          .set(appUser.toFirestore());
 
       // TODO: AUTOMATE WITH CLOUD FUNCTION
       // start transaction to keep track of user count in schedule
-      final parameterRef = experimentRef.collection(settingsCollectionName).doc(parameterDocName);
-      final transactionWasSuccessful = await _firestore.runTransaction((transaction) async {
+      final parameterRef = experimentRef
+          .collection(settingsCollectionName)
+          .doc(parameterDocName);
+      final transactionWasSuccessful =
+          await _firestore.runTransaction((transaction) async {
         // get experiment document
         final parameterDoc = await transaction.get(parameterRef);
 
@@ -105,7 +165,8 @@ class FirestoreUserRepository {
         }
 
         // get current parameters
-        final currentParameters = ScheduleParameters.fromJson(parameterDoc.data()!);
+        final currentParameters =
+            ScheduleParameters.fromJson(parameterDoc.data()!);
 
         // convert user to simple user
         final simpleUser = SimpleUser.fromAppUser(appUser);
@@ -115,7 +176,8 @@ class FirestoreUserRepository {
         users.add(simpleUser);
 
         // create updated schedule
-        final updatedParameters = currentParameters.copyWith(allActiveUsers: users);
+        final updatedParameters =
+            currentParameters.copyWith(allActiveUsers: users);
 
         // update schedule doc with new user count and color color code list
         transaction.update(parameterRef, updatedParameters.toJson());
@@ -130,6 +192,7 @@ class FirestoreUserRepository {
   }
 }
 
-final firestoreUserRepositoryProvider = Provider<FirestoreUserRepository>((ref) {
+final firestoreUserRepositoryProvider =
+    Provider<FirestoreUserRepository>((ref) {
   return FirestoreUserRepository(ref.watch(firestoreInstanceProvider));
 });

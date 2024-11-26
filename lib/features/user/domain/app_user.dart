@@ -15,10 +15,13 @@ class AppUser with _$AppUser {
     required String colorCode,
     required String experimentDocId,
     required int? currentTableNumber,
+    @Default(false) bool surveySubmitted,
+    @Default(false) bool showSurvey,
     @TimestampConverter() required DateTime createdOn,
   }) = _AppUser;
 
-  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+  factory AppUser.fromJson(Map<String, dynamic> json) =>
+      _$AppUserFromJson(json);
 
   factory AppUser.fromFirestore(Map<String, dynamic> firestoreMap, String uid) {
     firestoreMap['uid'] = uid;
@@ -35,8 +38,13 @@ class AppUser with _$AppUser {
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        other is AppUser && runtimeType == other.runtimeType && uid == other.uid;
+        other is AppUser &&
+            runtimeType == other.runtimeType &&
+            uid == other.uid;
   }
+
+  // Getter for uid
+  String get userId => uid;
 
   @override
   int get hashCode => uid.hashCode;
