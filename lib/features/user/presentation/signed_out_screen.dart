@@ -5,12 +5,14 @@ class SignedOutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.green,
-      child: const Center(
-        child: Text(
-          'Thanks for playing!',
-          style: TextStyle(fontSize: 30),
+    return Scaffold(
+      body: Container(
+        color: Colors.green,
+        child: const Center(
+          child: Text(
+            'Thanks for playing!',
+            style: TextStyle(fontSize: 30),
+          ),
         ),
       ),
     );

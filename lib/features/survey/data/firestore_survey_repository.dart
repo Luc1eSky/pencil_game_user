@@ -40,9 +40,7 @@ class FirestoreSurveyRepository {
           .doc(experimentId)
           .collection('users')
           .doc(userID)
-          .update({'surveyTest': survey.toJson()});
-      //.update({'Surveytest': true});
-      //
+          .update({'survey': survey.toJson()});
       debugPrint('Survey info successfully added.');
     } catch (e) {
       debugPrint('Failed to add survey info: $e');

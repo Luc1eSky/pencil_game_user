@@ -43,7 +43,8 @@ class _GameScreenState extends State<GameScreen> {
 
   void _startTimer() {
     const oneSecond = Duration(seconds: 1);
-    Duration delay = oneSecond - Duration(milliseconds: _serverTimeNow().millisecond);
+    Duration delay =
+        oneSecond - Duration(milliseconds: _serverTimeNow().millisecond);
 
     _timer = Timer(delay, () {
       Timer.periodic(oneSecond, (timer) {
@@ -75,9 +76,11 @@ class _GameScreenState extends State<GameScreen> {
     // if game has not yet started
     if (!gameHasStarted) {
       final countInDifference = _serverStartTime.difference(_serverTimeNow());
-      final countInDuration = countInDifference.isNegative ? Duration.zero : countInDifference;
-      final formattedCountInSeconds =
-          countInDuration.inSeconds == 0 ? 'START' : countInDuration.inSeconds.toString();
+      final countInDuration =
+          countInDifference.isNegative ? Duration.zero : countInDifference;
+      final formattedCountInSeconds = countInDuration.inSeconds == 0
+          ? 'START'
+          : countInDuration.inSeconds.toString();
 
       final showCountIn = countInDuration.inSeconds < 4;
       // show count in (3...2...1...START)
@@ -131,7 +134,9 @@ class _GameScreenState extends State<GameScreen> {
                           padding: const EdgeInsets.all(20.0),
                           child: ElevatedButton(
                             onPressed: () {
-                              ref.read(realtimeDatabaseRepositoryProvider).returnPen(
+                              ref
+                                  .read(realtimeDatabaseRepositoryProvider)
+                                  .returnPen(
                                     experimentDocId: widget.experimentDocId,
                                     tableNumber: widget.table.tableNumber,
                                     user: widget.user,
@@ -160,7 +165,9 @@ class _GameScreenState extends State<GameScreen> {
                             height: 50,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: widget.table.someOneHasPen ? Colors.red : Colors.green,
+                              color: widget.table.someOneHasPen
+                                  ? Colors.red
+                                  : Colors.green,
                             ),
                           ),
                           const SizedBox(height: 50),
@@ -172,28 +179,36 @@ class _GameScreenState extends State<GameScreen> {
                             onPressed: grabPenButtonIsBlocked
                                 ? null
                                 : () async {
-                                    setState(() => grabPenButtonIsBlocked = true);
+                                    setState(
+                                        () => grabPenButtonIsBlocked = true);
                                     final shouldFollowUp = await ref
-                                        .read(realtimeDatabaseRepositoryProvider)
+                                        .read(
+                                            realtimeDatabaseRepositoryProvider)
                                         .tryToGrabPen(
-                                          experimentDocId: widget.experimentDocId,
+                                          experimentDocId:
+                                              widget.experimentDocId,
                                           tableNumber: widget.table.tableNumber,
                                           user: widget.user,
                                         );
 
                                     if (shouldFollowUp) {
-                                      await Future.delayed(
-                                          const Duration(milliseconds: catchUpDelayInMilliseconds));
+                                      await Future.delayed(const Duration(
+                                          milliseconds:
+                                              catchUpDelayInMilliseconds));
                                       print('Follow up now.');
                                       await ref
-                                          .read(realtimeDatabaseRepositoryProvider)
+                                          .read(
+                                              realtimeDatabaseRepositoryProvider)
                                           .followUpClick(
-                                            experimentDocId: widget.experimentDocId,
-                                            tableNumber: widget.table.tableNumber,
+                                            experimentDocId:
+                                                widget.experimentDocId,
+                                            tableNumber:
+                                                widget.table.tableNumber,
                                             user: widget.user,
                                           );
                                     }
-                                    setState(() => grabPenButtonIsBlocked = false);
+                                    setState(
+                                        () => grabPenButtonIsBlocked = false);
                                   },
                             child: const Text(
                               'GRAB PEN',

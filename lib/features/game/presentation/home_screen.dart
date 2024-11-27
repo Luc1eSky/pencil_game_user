@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_user/constants.dart';
-import 'package:pencil_game_user/features/survey/presentation/survey_dialog.dart';
+import 'package:pencil_game_user/features/survey/presentation/survey_screen.dart';
 
 import '../../../firebase/database_time_offset_provider.dart';
 import '../../authorize/data/firestore_auth_instance_provider.dart';
@@ -58,24 +58,21 @@ class HomeScreen extends ConsumerWidget {
               } catch (e) {
                 return Text('Error with user object: ${e.toString()}');
               }
-
-              // check if survey should be displayed
+// check if survey should be displayed
               if (appUser.showSurvey) {
-                return ElevatedButton(
-                  onPressed: () async {
-                    print('button pressed');
-                    // Show survey to user
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const SurveyDialog();
-                      },
-                    );
-                  },
-                  child: const Text('Go to Survey'),
-                );
-              }
+                // Use WidgetsBinding to schedule navigation after the build phase
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const SurveyScreen(),
+                      fullscreenDialog: true,
+                    ),
+                  );
+                });
 
+                // Return an empty container or placeholder since no button is needed
+                return const SizedBox.shrink();
+              }
               // get table number from app user
               final tableNumber = appUser.currentTableNumber;
               // convert to simple user
