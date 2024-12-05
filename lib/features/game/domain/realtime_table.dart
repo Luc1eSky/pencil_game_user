@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -25,11 +26,14 @@ class RealtimeTable with _$RealtimeTable {
     List<NumberCopyResult>? numberCopyResults,
   }) = _RealtimeTable;
 
-  factory RealtimeTable.fromJson(Map<String, dynamic> json) => _$RealtimeTableFromJson(json);
+  factory RealtimeTable.fromJson(Map<String, dynamic> json) =>
+      _$RealtimeTableFromJson(json);
 
   // needed to show who is at the table already
-  bool get firstUserIsPresent => usersAtTable?.contains(assignedUsers.elementAt(0)) ?? false;
-  bool get secondUserIsPresent => usersAtTable?.contains(assignedUsers.elementAt(1)) ?? false;
+  bool get firstUserIsPresent =>
+      usersAtTable?.contains(assignedUsers.elementAt(0)) ?? false;
+  bool get secondUserIsPresent =>
+      usersAtTable?.contains(assignedUsers.elementAt(1)) ?? false;
   // flag that signals if table is ready
   bool get hasCorrectUsers => setEquals(assignedUsers, usersAtTable);
 
@@ -50,6 +54,18 @@ class RealtimeTable with _$RealtimeTable {
   // check if user has already clicked
   bool userHasClicked(SimpleUser user) {
     return lastClick?.user == user;
+  }
+
+  // check if user has already clicked
+  int inputNumberCount({required SimpleUser user, required bool forMyself}) {
+    // check if for yourself or other user
+
+    final myNumberCopyResult = numberCopyResults?.firstWhereOrNull(
+        (element) => forMyself ? element.user == user : element.user != user);
+    if (myNumberCopyResult == null) {
+      return 0;
+    }
+    return myNumberCopyResult.correctAnswersCount;
   }
 }
 

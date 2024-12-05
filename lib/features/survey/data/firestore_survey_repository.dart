@@ -35,12 +35,21 @@ class FirestoreSurveyRepository {
     }
 
     try {
+      /// add survey to firebase
       await _firestore
           .collection(experimentCollectionName)
           .doc(experimentId)
           .collection('users')
           .doc(userID)
           .update({'survey': survey.toJson()});
+
+      /// set surveySubmitted to true for payout
+      await _firestore
+          .collection(experimentCollectionName)
+          .doc(experimentId)
+          .collection('users')
+          .doc(userID)
+          .update({'surveySubmitted': true});
       debugPrint('Survey info successfully added.');
     } catch (e) {
       debugPrint('Failed to add survey info: $e');

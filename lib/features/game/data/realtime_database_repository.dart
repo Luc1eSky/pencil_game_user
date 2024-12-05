@@ -34,12 +34,15 @@ class RealtimeDatabaseRepository {
     required SimpleUser user,
   }) async {
     // save reference to table
-    final tableRef =
-        _realtimeDatabase.ref(experimentDocId).child('tables').child('table$tableNumber');
+    final tableRef = _realtimeDatabase
+        .ref(experimentDocId)
+        .child('tables')
+        .child('table$tableNumber');
 
     // convert to table
     final dataSnap = await tableRef.get();
-    final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(dataSnap.value));
+    final Map<String, dynamic> convertedData =
+        jsonDecode(jsonEncode(dataSnap.value));
     final table = RealtimeTable.fromJson(convertedData);
     // get a copy of the current users set
     final currentUsersAtTable = table.usersAtTable ?? {};
@@ -60,8 +63,10 @@ class RealtimeDatabaseRepository {
     required SimpleUser user,
   }) async {
     // save reference to table
-    final tableRef =
-        _realtimeDatabase.ref(experimentDocId).child('tables').child('table$tableNumber');
+    final tableRef = _realtimeDatabase
+        .ref(experimentDocId)
+        .child('tables')
+        .child('table$tableNumber');
 
     // default state is to not follow up
     bool shouldFollowUp = false;
@@ -74,7 +79,8 @@ class RealtimeDatabaseRepository {
       }
 
       // convert data to table object
-      final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(tableValue));
+      final Map<String, dynamic> convertedData =
+          jsonDecode(jsonEncode(tableValue));
       final table = RealtimeTable.fromJson(convertedData);
 
       // exit if table was finished already
@@ -116,7 +122,8 @@ class RealtimeDatabaseRepository {
         List<Click> listOfAddedClicks;
         if (lastClick.timestamp.isBefore(newClick.timestamp)) {
           winningUid = lastClick.user.uid; // last click wins
-          final lastClickSuccess = lastClick.copyWith(type: ClickType.grabPenSuccess);
+          final lastClickSuccess =
+              lastClick.copyWith(type: ClickType.grabPenSuccess);
           listOfAddedClicks = [lastClickSuccess, newClickFail];
         } else {
           winningUid = newClick.user.uid; // new click wins
@@ -124,7 +131,8 @@ class RealtimeDatabaseRepository {
           listOfAddedClicks = [newClickSuccess, lastClickFail];
         }
         // add both clicks to archived list of table
-        final tableWithClicks = _addClicks(table: table, clicks: listOfAddedClicks);
+        final tableWithClicks =
+            _addClicks(table: table, clicks: listOfAddedClicks);
         // update table with winning uid and remove last click
         final updatedTable = tableWithClicks.copyWith(
           uidThatHasPen: winningUid,
@@ -154,8 +162,10 @@ class RealtimeDatabaseRepository {
     required SimpleUser user,
   }) async {
     // save reference to table
-    final tableRef =
-        _realtimeDatabase.ref(experimentDocId).child('tables').child('table$tableNumber');
+    final tableRef = _realtimeDatabase
+        .ref(experimentDocId)
+        .child('tables')
+        .child('table$tableNumber');
 
     await tableRef.runTransaction((Object? tableValue) {
       // exit in case there is no table
@@ -164,7 +174,8 @@ class RealtimeDatabaseRepository {
       }
 
       // convert data to table object and get last click
-      final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(tableValue));
+      final Map<String, dynamic> convertedData =
+          jsonDecode(jsonEncode(tableValue));
       final table = RealtimeTable.fromJson(convertedData);
       final lastClick = table.lastClick;
 
@@ -174,10 +185,12 @@ class RealtimeDatabaseRepository {
       }
 
       // archive successful click and grab pen
-      final lastClickSuccess = lastClick.copyWith(type: ClickType.grabPenSuccess);
+      final lastClickSuccess =
+          lastClick.copyWith(type: ClickType.grabPenSuccess);
 
       // add both clicks to archived list of table
-      final tableWithClick = _addClicks(table: table, clicks: [lastClickSuccess]);
+      final tableWithClick =
+          _addClicks(table: table, clicks: [lastClickSuccess]);
       // update table with winning uid and remove last click
       final updatedTable = tableWithClick.copyWith(
         uidThatHasPen: user.uid,
@@ -196,8 +209,10 @@ class RealtimeDatabaseRepository {
     required SimpleUser user,
   }) async {
     // save reference to table
-    final tableRef =
-        _realtimeDatabase.ref(experimentDocId).child('tables').child('table$tableNumber');
+    final tableRef = _realtimeDatabase
+        .ref(experimentDocId)
+        .child('tables')
+        .child('table$tableNumber');
 
     await tableRef.runTransaction((Object? tableValue) {
       // exit in case there is no table
@@ -206,7 +221,8 @@ class RealtimeDatabaseRepository {
       }
 
       // convert data to table object
-      final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(tableValue));
+      final Map<String, dynamic> convertedData =
+          jsonDecode(jsonEncode(tableValue));
       final table = RealtimeTable.fromJson(convertedData);
 
       // exit in case user does not have pen anymore
@@ -232,7 +248,8 @@ class RealtimeDatabaseRepository {
 
   /// helper function that creates new table object with a new click
   /// added to the archived list of clicks
-  RealtimeTable _addClicks({required RealtimeTable table, required List<Click> clicks}) {
+  RealtimeTable _addClicks(
+      {required RealtimeTable table, required List<Click> clicks}) {
     final archivedClicks = table.archivedClicks ?? [];
     final archivedClicksCopy = [...archivedClicks];
     archivedClicksCopy.addAll(clicks);
@@ -265,7 +282,8 @@ class RealtimeDatabaseRepository {
 
       // exit in case there is no results yet
       if (currentValue == null) {
-        final newResult = NumberCopyResult(user: user, numberInputs: [newNumberInput]);
+        final newResult =
+            NumberCopyResult(user: user, numberInputs: [newNumberInput]);
         // update results list in database with first entry
         return Transaction.success([newResult.toJson()]);
       }
@@ -274,16 +292,19 @@ class RealtimeDatabaseRepository {
       final currentResultsList = currentValue as List<dynamic>;
       // get all results for all users
       final currentResults = currentResultsList.map((result) {
-        final Map<String, dynamic> convertedData = jsonDecode(jsonEncode(result));
+        final Map<String, dynamic> convertedData =
+            jsonDecode(jsonEncode(result));
         return NumberCopyResult.fromJson(convertedData);
       }).toList();
       // get index of entry for specific user
-      final myResultIndex = currentResults.indexWhere((result) => result.user == user);
+      final myResultIndex =
+          currentResults.indexWhere((result) => result.user == user);
 
       // if user has not yet entered a result (index == -1)
       if (myResultIndex == -1) {
         // add new result to existing list
-        final newResult = NumberCopyResult(user: user, numberInputs: [newNumberInput]);
+        final newResult =
+            NumberCopyResult(user: user, numberInputs: [newNumberInput]);
         currentResults.add(newResult);
       } else {
         // if user already has some results, read them
@@ -298,7 +319,8 @@ class RealtimeDatabaseRepository {
       }
 
       // convert list of results back to list of json maps
-      final jsonResultsList = currentResults.map((result) => result.toJson()).toList();
+      final jsonResultsList =
+          currentResults.map((result) => result.toJson()).toList();
       // update list in database
       return Transaction.success(jsonResultsList);
     });
@@ -310,7 +332,8 @@ class RealtimeDatabaseRepository {
   }
 }
 
-final realtimeDatabaseRepositoryProvider = Provider<RealtimeDatabaseRepository>((ref) {
+final realtimeDatabaseRepositoryProvider =
+    Provider<RealtimeDatabaseRepository>((ref) {
   return RealtimeDatabaseRepository(
     FirebaseDatabase.instance,
     ref.watch(databaseTimeOffsetRepositoryProvider),

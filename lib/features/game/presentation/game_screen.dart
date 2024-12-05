@@ -9,7 +9,7 @@ import 'package:pencil_game_user/features/user/domain/simple_user.dart';
 import '../../../constants.dart';
 import '../data/realtime_database_repository.dart';
 
-class GameScreen extends StatefulWidget {
+class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({
     super.key,
     required this.experimentDocId,
@@ -24,10 +24,10 @@ class GameScreen extends StatefulWidget {
   final Duration databaseOffset;
 
   @override
-  State<GameScreen> createState() => _GameScreenState();
+  ConsumerState<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+class _GameScreenState extends ConsumerState<GameScreen> {
   bool grabPenButtonIsBlocked = false;
   late DateTime _serverStartTime;
   late DateTime _serverEndTime;
@@ -117,12 +117,35 @@ class _GameScreenState extends State<GameScreen> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: Text(
-            formattedTimeLeftDuration,
-            style: const TextStyle(fontSize: 30),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                  child: Text(
+                    'Yourself: ${widget.table.inputNumberCount(user: widget.user, forMyself: true).toString()}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text(
+                'Timer: $formattedTimeLeftDuration',
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 20, 20, 0),
+              child: Text(
+                'Other player: ${widget.table.inputNumberCount(user: widget.user, forMyself: false).toString()}',
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
         ),
         Expanded(
           child: Consumer(
